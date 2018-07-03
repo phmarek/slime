@@ -106,11 +106,35 @@ program.")
 ;;;
 (defvar *traced-specs* '())
 
+(defun store-current-value (x)
+  (cond 
+    ((or (null x)
+         (packagep x)            ; won't change, we hope
+         (characterp x)          
+         (keywordp x)          
+         (functionp x)           ; can't do anything here, but shouldn't change either
+         (eq x t)
+         (eq x nil)
+         (eq x 'still-inside)    ; special case
+         (numberp x))            x)
+    ;; COPY-SYMBOL alone would lose the package information
+    ((symbolp x)                 (let ((*package* (find-package :keyword))) (format nil "~s" x)))
+    ((arrayp x)                  (alexandria:copy-array x))
+    ((random-state-p x)          (make-random-state x))
+    ((pathnamep x)               (merge-pathnames (make-pathname) x))
+    ((typep x 'structure-object) (copy-structure x))
+    ((consp x)                   (cons (store-current-value (car x))
+                                       (store-current-value (cdr x))))
+    ;; fallback
+    ;;   (streamp x)
+    ;;   CLOS objects
+    (T                           (princ-to-string x) #+(or)(format nil "Type ~s, printed as ~s" (type-of x) x))))
+
 (defslimefun dialog-trace (spec)
   (flet ((before-hook (args)
            (setf (current-trace) (make-instance 'trace-entry
                                                 :spec      spec
-                                                :args      args
+                                                :args      (mapcar #'store-current-value args)
                                                 :parent    (current-trace))))
          (after-hook (retlist)
            (let ((trace (current-trace)))
@@ -119,7 +143,10 @@ program.")
                ;; user cleared the tree in the meantime. no biggie,
                ;; don't do anything.
                ;;
-               (setf (retlist-of trace) retlist
+               ;; Might also get :EXITED-NON-LOCALLY
+               (setf (retlist-of trace) (if (consp retlist)
+                                          (mapcar #'store-current-value retlist)
+                                          retlist)
                      (current-trace) (parent-of trace))))))
     (when (dialog-traced-p spec)
       (warn "~a is apparently already traced! Untracing and retracing." spec)
