@@ -2246,6 +2246,7 @@ frame."
                  ((t) `((:restartable t)))))))
 
 (defun frame-to-string (frame)
+  ;; Might leave half quotes
   (with-string-stream (stream :length (* (or *print-lines* 1) 
                                          (or *print-right-margin* 100))
                               :bindings *backtrace-printer-bindings*)
