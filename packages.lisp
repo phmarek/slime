@@ -164,6 +164,7 @@
            #:*swank-pprint-bindings*
            #:*record-repl-results*
            #:*inspector-verbose*
+           #:on-inspect-bind-to
            ;; This is SETFable.
            #:debug-on-swank-error
            ;; These are re-exported directly from the backend:
