@@ -1650,7 +1650,7 @@ stack."
       (find id (sb-thread:list-all-threads) :key #'sb-thread::thread-os-tid)))
 
   (defimplementation spawn (fn &key name)
-    (sb-thread:make-thread fn :name name))
+    (sb-thread:make-thread fn :name (coerce name 'simple-string)))
 
   (defimplementation thread-name (thread)
     ;; sometimes the name is not a string (e.g. NIL)
