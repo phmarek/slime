@@ -1,10 +1,10 @@
 ;;; swank-repl.lisp --- Server side part of the Lisp listener.
 ;;
 ;; License: public domain
-(in-package swank)
+(in-package :swank)
 
-(defpackage swank-repl
-  (:use cl swank/backend)
+(defpackage :swank-repl
+  (:use cl :swank/backend)
   (:export *send-repl-results-function*
            clear-repl-variables
            listener-eval
@@ -14,7 +14,7 @@
            redirect-trace-output
            run-function-and-switch-to-new-thread)
   (:import-from
-   swank
+   :swank
 
    *default-worker-thread-bindings*
 
@@ -74,7 +74,7 @@
    ;; do that whithout breaking init files?
    *globally-redirect-io*))
 
-(in-package swank-repl)
+(in-package :swank-repl)
 
 (defvar *globally-redirect-io* :started-from-emacs
   "When T globally redirect all standard streams to Emacs.
